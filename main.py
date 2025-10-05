@@ -10,6 +10,8 @@ API_SECRET = os.getenv("API_KEY_SECRET")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # creating twitter client 
 
 client = tweepy.Client(
@@ -50,10 +52,18 @@ def post_promo_on_x(promo_data):
 def post_snippet(caption, file):
     try:
         media = api.media_upload(file, media_category="tweet_video")
-        api.update_status(status=caption, media_ids = [media.media_id])
+        client.create_tweet(text=caption, media_ids = [media.media_id])
         print(f"✅ Snippet posted: {caption}")
     except Exception as e:
         print(f"❌ Error posting snippet: {e}")
+        traceback.print_exc()
+
+def post_now(video):
+    try:
+        post_snippet(video["caption"], video["file"])
+        print(f"✅ Snippet posted immediately: {video['caption']}")
+    except Exception as e:
+        print(f"❌ Error posting snippet immediately: {e}")
         traceback.print_exc()
 
 # schedule video posts
@@ -71,10 +81,13 @@ schedule.every(6).hours.do(post_promo_on_x, promo_posts)
 
 print("🤖 Bot running...")
 
+post_now(video_posts[1])
+
 #infinite loop where everything runs
 
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(60)
+
 
 
